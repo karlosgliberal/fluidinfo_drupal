@@ -4,5 +4,6 @@ description=Fluid info module
 core=7.x
 
 dependencies[] = field
+dependencies[] = entity
 
 
