@@ -35,5 +35,13 @@ function fluidinfo_configuracion() {
     '#default_value' => variable_get('node_types', array()),
     '#options' => node_type_get_names(),
   );
+  
+  $form['fluidinfo']['fluid_sandbox'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Sandbox'),
+    '#description' => t('Quieres usar el sanbox de fluidinfo para las pruebas'),
+    '#default_value' => variable_get('fluid_sandbox', array()),
+    '#options' => t('si'),
+  );
   return system_settings_form($form);
 }

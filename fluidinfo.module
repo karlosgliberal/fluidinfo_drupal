@@ -1,10 +1,15 @@
 <?php
+$path = drupal_get_path('module', 'fluidinfo');
+require ($path . '/lib/fluidinfo.php');
 
-require('lib/fluidinfo.php');
 
 function fi_getfluidinfo() {
   $fluidinfo = new Fluidinfo();
-  $fluidinfo->setPrefix('https://fluiddb.fluidinfo.com');
+  $prefix = '';
+  if(variable_get('fluid_sandbox')){
+    $prefix = 'http://sandbox.fluidinfo.com'; 
+  }
+  $fluidinfo->setPrefix($prefix);
   $fluidinfo->setCredentials(variable_get('fluid_user'), variable_get('fluid_password'));
   return $fluidinfo;
 }
@@ -34,7 +39,7 @@ function fluidinfo_menu() {
 function fluidinfo_form_field_ui_field_edit_form_alter(&$form, $form_state, $form_id) {
   $node_type = $form['#instance']['bundle'];
   $variable_node_types = variable_get('node_types');
-  if((string)$variable_node_types[$node_type] == (string)$node_type){
+  if(isset($variable_node_types[$node_type])){
     $form['instance']['fluidinfo'] = array(
       '#type' => 'checkbox',
       '#title' => t('activa fluidinfo'),
@@ -86,11 +91,11 @@ function _create_fluidinfo($node){
             }
             break;
           default:
+              $campo_fluid[$tag] = $wrapper->$key['field_name']->value(array('sanitize' => TRUE));;
             break;
       }
     }
   }
-  dpm($campo_fluid);
   $out = $fluidinfo->updateValues('fluiddb/about="'.$base_url.'/node/'.$node->nid.'"', $campo_fluid);
 }
 
