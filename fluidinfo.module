@@ -1,6 +1,6 @@
 <?php
 
-require('fluidinfo.php');
+require('lib/fluidinfo.php');
 
 function fi_getfluidinfo() {
   $fluidinfo = new Fluidinfo();
