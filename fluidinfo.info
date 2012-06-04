@@ -1,0 +1,8 @@
+name=Fluidinfo
+package=fluidinfo
+description=Fluid info module
+core=7.x
+
+dependencies[] = field
+
+

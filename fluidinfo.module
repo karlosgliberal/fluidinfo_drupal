@@ -1,0 +1,96 @@
+<?php
+
+require('fluidinfo.php');
+
+function fi_getfluidinfo() {
+  $fluidinfo = new Fluidinfo();
+  $fluidinfo->setPrefix('https://fluiddb.fluidinfo.com');
+  $fluidinfo->setCredentials(variable_get('fluid_user'), variable_get('fluid_password'));
+  return $fluidinfo;
+}
+
+
+/**
+ * Implementación del hook_menu()
+ */                                                                                                                                                                                                       
+function fluidinfo_menu() {
+
+  $items = array();
+  $items['admin/config/content/fluidinfo'] = array(
+    'title' => 'Fluidinfo',
+    'description' => 'Configuración de fluidinfo',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('fluidinfo_configuracion'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'fluidinfo.admin.inc',
+  );
+  return $items;
+}
+
+
+/**
+*  Implementation of hook_form_FORM_ID_alter
+*/
+function fluidinfo_form_field_ui_field_edit_form_alter(&$form, $form_state, $form_id) {
+  $node_type = $form['#instance']['bundle'];
+  $variable_node_types = variable_get('node_types');
+  if((string)$variable_node_types[$node_type] == (string)$node_type){
+    $form['instance']['fluidinfo'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('activa fluidinfo'),
+      '#description' => t('Quieres que este campo sea guardado por fluidinfo?'),
+      '#default_value' => isset($form['#instance']['fluidinfo']) ? $form['#instance']['fluidinfo'] : '',
+      '#weight' => $form['instance']['label']['#weight'] + 1,
+    );
+  }
+}
+
+function fluidinfo_node_insert($node){  
+  _create_fluidinfo($node);    
+}
+
+function fluidinfo_node_update($node){
+  _create_fluidinfo($node);    
+}
+
+
+function _create_fluidinfo($node){
+  global $base_url;
+  $fluidinfo = fi_getfluidinfo();
+
+  $fluid_namespace = variable_get('fluid_namespace');
+  $fluid_user = variable_get('fluid_user');
+  $ns = $fluid_user.'/'.$fluid_namespace.'/';
+
+  $instance = field_info_instances();
+  $campos = $instance['node'][$node->type];
+  $wrapper = entity_metadata_wrapper('node', $node);
+
+  foreach ($campos as $key) {
+    $tag = $ns.strtolower($key['label']);
+    if(isset($key['fluidinfo'])){
+      switch ($key['widget']['module']) {
+        case 'text':
+            if($key['widget']['type'] == 'text_textarea_with_summary'){
+              $campo_fluid[$tag] = $wrapper->$key['field_name']->value->raw();
+              $campo_fluid[$ns.'title'] = $wrapper->title->value(array('sanitize' => TRUE));
+            }else{
+              $campo_fluid[$tag] = $wrapper->$key['field_name']->value(array('sanitize' => TRUE));;
+            }
+            break;
+          case 'taxonomy':
+            $taxonomy = $wrapper->$key['field_name']->value(array('sanitize' => TRUE));
+            $campo_fluid[$tag] = array();
+            foreach ($taxonomy as $term) {
+              array_push($campo_fluid[$tag], $term->name);
+            }
+            break;
+          default:
+            break;
+      }
+    }
+  }
+  dpm($campo_fluid);
+  $out = $fluidinfo->updateValues('fluiddb/about="'.$base_url.'/node/'.$node->nid.'"', $campo_fluid);
+}
+
