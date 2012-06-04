@@ -1,8 +1,9 @@
 Fluidinfo para Drupal
 =====================
 
-* TODO
+
 
 Config
 ------
 
+You need to have a account in fluidinfo.com 
