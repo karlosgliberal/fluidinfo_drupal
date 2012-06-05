@@ -8,6 +8,8 @@ function fi_getfluidinfo() {
   $prefix = '';
   if(variable_get('fluid_sandbox')){
     $prefix = 'http://sandbox.fluidinfo.com'; 
+  }else{
+	  $prefix = 'https://fluiddb.fluidinfo.com';
   }
   $fluidinfo->setPrefix($prefix);
   $fluidinfo->setCredentials(variable_get('fluid_user'), variable_get('fluid_password'));
@@ -78,7 +80,6 @@ function _create_fluidinfo($node){
         case 'text':
             if($key['widget']['type'] == 'text_textarea_with_summary'){
               $campo_fluid[$tag] = $wrapper->$key['field_name']->value->raw();
-              $campo_fluid[$ns.'title'] = $wrapper->title->value(array('sanitize' => TRUE));
             }else{
               $campo_fluid[$tag] = $wrapper->$key['field_name']->value(array('sanitize' => TRUE));;
             }
@@ -92,10 +93,12 @@ function _create_fluidinfo($node){
             break;
           default:
               $campo_fluid[$tag] = $wrapper->$key['field_name']->value(array('sanitize' => TRUE));;
+              $campo_fluid[$ns.'title'] = $wrapper->title->value(array('sanitize' => TRUE));
             break;
       }
     }
   }
+  dpm($campo_fluid);
   $out = $fluidinfo->updateValues('fluiddb/about="'.$base_url.'/node/'.$node->nid.'"', $campo_fluid);
 }
 
