@@ -52,12 +52,22 @@ function fluidinfo_form_field_ui_field_edit_form_alter(&$form, $form_state, $for
   }
 }
 
-function fluidinfo_node_insert($node){  
-  _create_fluidinfo($node);    
+function fluidinfo_node_insert($node){
+  $variable_node_types = variable_get('node_types');
+  if(isset($variable_node_types[$node->type])){
+    if((string)$variable_node_types[$node->type] == (string)$node->type){
+      _create_fluidinfo($node);    
+    }  
+  }
 }
 
 function fluidinfo_node_update($node){
-  _create_fluidinfo($node);    
+  $variable_node_types = variable_get('node_types');
+  if(isset($variable_node_types[$node->type])){
+    if((string)$variable_node_types[$node->type] == (string)$node->type){
+      _create_fluidinfo($node);    
+    }  
+  }
 }
 
 
@@ -76,6 +86,7 @@ function _create_fluidinfo($node){
   foreach ($campos as $key) {
     $tag = $ns.strtolower($key['label']);
     if(isset($key['fluidinfo'])){
+      dpm($key);
       switch ($key['widget']['module']) {
         case 'text':
             if($key['widget']['type'] == 'text_textarea_with_summary'){
@@ -93,6 +104,7 @@ function _create_fluidinfo($node){
             break;
           case 'options':
             $taxonomy = $wrapper->$key['field_name']->value(array('sanitize' => TRUE));
+            dpm($taxonomy);
             if(isset($taxonomy[0]->vocabulary_machine_name)){
               $campo_fluid[$tag] = array();
               foreach ($taxonomy as $term) {
@@ -104,13 +116,13 @@ function _create_fluidinfo($node){
             }
             break;
           default:
-              // $campo_fluid[$tag] = $wrapper->$key['field_name']->value(array('sanitize' => TRUE));;
+              $campo_fluid[$tag] = $wrapper->$key['field_name']->value(array('sanitize' => TRUE));;
               // $campo_fluid[$ns.'title'] = $wrapper->title->value(array('sanitize' => TRUE));
             break;
       }
     }
   }
   // dpm($campo_fluid);
-  $out = $fluidinfo->updateValues('fluiddb/about="'.$base_url.'/node/'.$node->nid.'"', $campo_fluid);
+  // $out = $fluidinfo->updateValues('fluiddb/about="'.$base_url.'/node/'.$node->nid.'"', $campo_fluid);
 }
 
