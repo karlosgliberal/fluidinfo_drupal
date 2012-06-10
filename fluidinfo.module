@@ -1,4 +1,7 @@
 <?php
+/**
+ * Work with fluidinfo database
+ */
 $path = drupal_get_path('module', 'fluidinfo');
 require ($path . '/lib/fluidinfo.php');
 
@@ -84,45 +87,29 @@ function _create_fluidinfo($node){
   $wrapper = entity_metadata_wrapper('node', $node);
   // TODO Es feo y poco usable quitar el swich sobre widget module y meterlo con displaymodule 
   foreach ($campos as $key) {
-    $tag = $ns.strtolower($key['label']);
+    $tag = $ns.strtolower($key['field_name']);
+    $label = $ns.preg_replace('/ /', '_', $key['label']);
     if(isset($key['fluidinfo'])){
-      dpm($key);
-      switch ($key['widget']['module']) {
-        case 'text':
-            if($key['widget']['type'] == 'text_textarea_with_summary'){
-              $campo_fluid[$tag] = $wrapper->$key['field_name']->value->raw();
-            }else{
-              $campo_fluid[$tag] = $wrapper->$key['field_name']->value(array('sanitize' => TRUE));;
+      if($key['fluidinfo'] == true){
+        switch ($key['display']['default']['type']) {
+          case 'node_reference_default':
+            $node_ref = $wrapper->$key['field_name']->value(array('sanitize' => true));
+            $campo_fluid[$label] = array();
+            foreach ($node_ref as $id) {
+              array_push($campo_fluid[$label], $id->title);
             }
             break;
-          case 'taxonomy':
-            $taxonomy = $wrapper->$key['field_name']->value(array('sanitize' => TRUE));
-            $campo_fluid[$tag] = array();
-            foreach ($taxonomy as $term) {
-              array_push($campo_fluid[$tag], $term->name);
-            }
-            break;
-          case 'options':
-            $taxonomy = $wrapper->$key['field_name']->value(array('sanitize' => TRUE));
-            dpm($taxonomy);
-            if(isset($taxonomy[0]->vocabulary_machine_name)){
-              $campo_fluid[$tag] = array();
-              foreach ($taxonomy as $term) {
-                array_push($campo_fluid[$tag], $term->name);
-               }
-            }else{
-              $campo_fluid[$tag] = $wrapper->$key['field_name']->value(array('sanitize' => TRUE));;
-              $campo_fluid[$ns.'title'] = $wrapper->title->value(array('sanitize' => TRUE));
-            }
+          case 'text_default':
+          case 'list_default':
+            $campo_fluid[$tag] = $wrapper->$key['field_name']->value(array('sanitize' => true));
             break;
           default:
-              $campo_fluid[$tag] = $wrapper->$key['field_name']->value(array('sanitize' => TRUE));;
-              // $campo_fluid[$ns.'title'] = $wrapper->title->value(array('sanitize' => TRUE));
+            $campo_fluid[$ns.'title'] = $wrapper->title->value(array('sanitize' => TRUE));
             break;
-      }
+        }
+    }
     }
   }
-  // dpm($campo_fluid);
-  // $out = $fluidinfo->updateValues('fluiddb/about="'.$base_url.'/node/'.$node->nid.'"', $campo_fluid);
+  $out = $fluidinfo->updateValues('fluiddb/about="'.$base_url.'/node/'.$node->nid.'"', $campo_fluid);
 }
 
