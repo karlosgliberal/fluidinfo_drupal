@@ -102,8 +102,10 @@ function _create_fluidinfo($node){
           case 'text_default':
           case 'list_default':
             $campo_fluid[$tag] = $wrapper->$key['field_name']->value(array('sanitize' => true));
+            $campo_fluid[$ns.'title'] = $wrapper->title->value(array('sanitize' => TRUE));
             break;
           default:
+            dpm('entro');
             $campo_fluid[$ns.'title'] = $wrapper->title->value(array('sanitize' => TRUE));
             break;
         }
