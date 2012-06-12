@@ -85,13 +85,16 @@ function _create_fluidinfo($node){
   $instance = field_info_instances();
   $campos = $instance['node'][$node->type];
   $wrapper = entity_metadata_wrapper('node', $node);
-  // TODO Es feo y poco usable quitar el swich sobre widget module y meterlo con displaymodule 
+  // TODO Es feo y poco usable quitar pero ahora cubre mi proposito 
   foreach ($campos as $key) {
     $tag = $ns.strtolower($key['field_name']);
     $label = $ns.preg_replace('/ /', '_', $key['label']);
     if(isset($key['fluidinfo'])){
       if($key['fluidinfo'] == true){
         switch ($key['display']['default']['type']) {
+          // TODO La primera y en la frente si es un compo de tipo node_referece 
+          // (mientras que entity-reference no me ponga seguire usandolo), 
+          // lo que meto en Fluidinfo es el titulo de nodo refrenciado
           case 'node_reference_default':
             $node_ref = $wrapper->$key['field_name']->value(array('sanitize' => true));
             $campo_fluid[$label] = array();
