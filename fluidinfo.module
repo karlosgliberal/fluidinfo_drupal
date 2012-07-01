@@ -115,6 +115,12 @@ function _create_fluidinfo($node){
     }
     }
   }
-  $out = $fluidinfo->updateValues('fluiddb/about="'.$base_url.'/node/'.$node->nid.'"', $campo_fluid);
+  $url_array = explode(".", $base_url);
+  if(count($url_array) === 3){
+    $url_sin_subdominio = "http://".$url_array[1].".".$url_array[2];
+  }else{
+    $url_sin_subdominio = $base_url; 
+  }
+  $out = $fluidinfo->updateValues('fluiddb/about="'.$url_sin_subdominio.'/node/'.$node->nid.'"', $campo_fluid);
 }
 
